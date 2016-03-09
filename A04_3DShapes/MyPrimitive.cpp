@@ -110,16 +110,24 @@ void MyPrimitive::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivis
 	Init();
 
 	//Your code starts here
-	float fValue = 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-fValue, -fValue, fValue); //0
-	vector3 point1(fValue, -fValue, fValue); //1
-	vector3 point2(fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
 
-	AddQuad(point0, point1, point3, point2);
+	vector3 top = vector3(0, a_fHeight, 0);
+	vector3 bottom = vector3(0, 0, 0);
+	float amt = glm::pi<float>() * 2 / a_nSubdivisions;
+	for (int i = 0; i < a_nSubdivisions; ++i)
+	{
+		int i2 = (i + 1) % a_nSubdivisions;
+		vector3 current = vector3(glm::sin(amt*i), 0, glm::cos(amt*i)) * a_fRadius;
+		vector3 next = vector3(glm::sin(amt*i2), 0, glm::cos(amt*i2)) * a_fRadius;
+
+		AddVertexPosition(current);
+		AddVertexPosition(next);
+		AddVertexPosition(top);
+
+		AddVertexPosition(current);
+		AddVertexPosition(bottom);
+		AddVertexPosition(next);
+	}
 
 	//Your code ends here
 	CompileObject(a_v3Color);
@@ -134,17 +142,32 @@ void MyPrimitive::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubd
 	Release();
 	Init();
 
-	//Your code starts here
-	float fValue = 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-fValue, -fValue, fValue); //0
-	vector3 point1(fValue, -fValue, fValue); //1
-	vector3 point2(fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
+	float amt = glm::pi<float>() * 2 / a_nSubdivisions;
+	float halfHeight = a_fHeight / 2.f;
+	vector3 halfVec = vector3(0, halfHeight, 0);
+	vector3 top = vector3(0, halfHeight, 0);
+	vector3 bottom = vector3(0, -halfHeight, 0);
+	for (int i = 0; i < a_nSubdivisions; ++i)
+	{
+		int i2 = (i + 1) % a_nSubdivisions;
+		vector3 current = vector3(glm::sin(amt*i), 0, glm::cos(amt*i)) * a_fRadius;
+		vector3 next = vector3(glm::sin(amt*i2), 0, glm::cos(amt*i2)) * a_fRadius;
 
-	AddQuad(point0, point1, point3, point2);
+		vector3 bl = current - halfVec;
+		vector3 br = next - halfVec;
+		vector3 tl = current + halfVec;
+		vector3 tr = next + halfVec;
+
+		AddQuad(bl, br, tl, tr);
+
+		AddVertexPosition(bl);
+		AddVertexPosition(bottom);
+		AddVertexPosition(br);
+
+		AddVertexPosition(tl);
+		AddVertexPosition(tr);
+		AddVertexPosition(top);
+	}
 
 	//Your code ends here
 	CompileObject(a_v3Color);
@@ -160,16 +183,36 @@ void MyPrimitive::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float
 	Init();
 
 	//Your code starts here
-	float fValue = 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-fValue, -fValue, fValue); //0
-	vector3 point1(fValue, -fValue, fValue); //1
-	vector3 point2(fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
+	float amt = glm::pi<float>() * 2 / a_nSubdivisions;
+	float halfHeight = a_fHeight / 2.f;
+	vector3 halfVec = vector3(0, halfHeight, 0);
+	for (int i = 0; i < a_nSubdivisions; ++i)
+	{
+		int i2 = (i + 1) % a_nSubdivisions;
+		vector3 current = vector3(glm::sin(amt*i), 0, glm::cos(amt*i));
+		vector3 next = vector3(glm::sin(amt*i2), 0, glm::cos(amt*i2));
 
-	AddQuad(point0, point1, point3, point2);
+		vector3 currentOut = current * a_fOuterRadius;
+		vector3 nextOut = next * a_fOuterRadius;
+
+		vector3 currentIn = current * a_fInnerRadius;
+		vector3 nextIn = next * a_fInnerRadius;
+
+		vector3 blo = currentOut - halfVec;
+		vector3 bro = nextOut - halfVec;
+		vector3 tlo = currentOut + halfVec;
+		vector3 tro = nextOut + halfVec;
+
+		vector3 bli = currentIn - halfVec;
+		vector3 bri = nextIn - halfVec;
+		vector3 tli = currentIn + halfVec;
+		vector3 tri = nextIn + halfVec;
+
+		AddQuad(blo, bro, tlo, tro);
+		AddQuad(bri, bli, tri, tli);
+		AddQuad(bro, blo, bri, bli);
+		AddQuad(tlo, tro, tli, tri);
+	}
 
 	//Your code ends here
 	CompileObject(a_v3Color);
@@ -222,16 +265,24 @@ void MyPrimitive::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a
 	Init();
 
 	//Your code starts here
-	float fValue = 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-fValue, -fValue, fValue); //0
-	vector3 point1(fValue, -fValue, fValue); //1
-	vector3 point2(fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
+	float amt = glm::pi<float>() * 2 / a_nSubdivisions;
+	for (int i = 0; i < a_nSubdivisions; ++i)
+	{
+		float theta = i * amt;
+		float thetaNext = ((i + 1) % a_nSubdivisions) * amt;
+		for (int j = 0; j < a_nSubdivisions; ++j)
+		{
+			float phi = j * amt;
+			float phiNext = ((i + 1) % a_nSubdivisions) * amt;
 
-	AddQuad(point0, point1, point3, point2);
+			vector3 tl = vector3(a_fRadius * glm::sin(phi) * glm::cos(theta), a_fRadius * glm::cos(phi), a_fRadius * glm::sin(phi) * glm::sin(theta));
+			vector3 tr = vector3(a_fRadius * glm::sin(phi) * glm::cos(thetaNext), a_fRadius * glm::cos(phi), a_fRadius * glm::sin(phi) * glm::sin(thetaNext));
+			vector3 bl = vector3(a_fRadius * glm::sin(phiNext) * glm::cos(theta), a_fRadius * glm::cos(phiNext), a_fRadius * glm::sin(phiNext) * glm::sin(theta));
+			vector3 br = vector3(a_fRadius * glm::sin(phiNext) * glm::cos(thetaNext), a_fRadius * glm::cos(phiNext), a_fRadius * glm::sin(phiNext) * glm::sin(thetaNext));
+
+			AddQuad(bl, br, tl, tr);
+		}
+	}
 
 	//Your code ends here
 	CompileObject(a_v3Color);

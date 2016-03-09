@@ -24,7 +24,7 @@ void AppClass::Update(void)
 
 	//Update the mesh manager's time without updating for collision detection
 	m_pMeshMngr->Update();
-#pragma region
+#pragma endregion
 
 #pragma region Does not need changes but feel free to change anything here
 	//Lets us know how much time has passed since the last call
@@ -36,7 +36,34 @@ void AppClass::Update(void)
 #pragma endregion
 
 #pragma region Your Code goes here
-	m_pMeshMngr->SetModelMatrix(IDENTITY_M4, "WallEye");
+	std::vector<vector3> positions = {
+		vector3(-4.f, -2.f, 5.f),
+		vector3(1.f, -2.f, 5.f),
+		vector3(-3.f, -1.f, 3.f),
+		vector3(2.f, -1.f, 3.f),
+		vector3(-2.f, 0.f, 0.f),
+		vector3(3.f, 0.f, 0.f),
+		vector3(-1.f, 1.f, -3.f),
+		vector3(4.f, 1.f, -3.f),
+		vector3(0.f, 2.f, -5.f),
+		vector3(5.f, 2.f, -5.f),
+		vector3(1.f, 3.f, -5.f)
+	};
+
+	for (auto& pos : positions)
+	{
+		m_pMeshMngr->AddSphereToQueue(glm::translate(pos) * glm::scale(vector3(0.1, 0.1, 0.1)), RERED);
+	}
+
+	// modular arithmetic to figure out current + next points to lerp based on run time
+
+	float adjustedRunTime = fRunTime / fDuration; // slow down the time by fDuration
+	int currentIdx = ((int)adjustedRunTime) % positions.size();
+	vector3 current = positions[currentIdx];
+	vector3 next = positions[(currentIdx + 1) % positions.size()];
+	float val = fmod(adjustedRunTime, positions.size()) - currentIdx;
+
+	m_pMeshMngr->SetModelMatrix(glm::translate(glm::lerp(current, next, val)), "WallEye");
 #pragma endregion
 
 #pragma region Does not need changes but feel free to change anything here
